@@ -34,6 +34,19 @@ export const profile = {
     { value: "3.8", label: "GPA / 4.0" },
   ],
 
+  /**
+   * Sponsor-style decals on the car: your stack, where a race team would put its sponsors.
+   * Keep names short (they are fitted to the panel). `color` is the small flash beside the name.
+   */
+  livery: {
+    sidepod: { name: "Python", color: "#FFD43B" }, // the title sponsor: your strongest language
+    engineCover: { name: "TypeScript", color: "#3178C6" },
+    nose: { name: "React", color: "#61DAFB" },
+    cockpit: { name: "Rust", color: "#F46623" },
+    /** Small row under the sidepod name: libraries and tools. */
+    strip: ["Node.js", "PostgreSQL", "Docker", "Three.js"],
+  },
+
   /** level: purple = strongest, green = comfortable, yellow = currently learning */
   skills: [
     {

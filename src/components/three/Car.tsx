@@ -1,5 +1,6 @@
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Decal } from '@react-three/drei';
 import * as THREE from 'three';
 import { profile } from '../../data/profile';
 import { scene } from '../../lib/sceneStore';
@@ -294,6 +295,101 @@ function numberTexture(text: string) {
   return tex;
 }
 
+/**
+ * A sponsor-style wordmark: a slanted colour flash followed by the name, on a transparent
+ * background. `aspect` is the width / height of the panel it will be applied to.
+ */
+function wordmarkTexture(name: string, color: string, aspect: number) {
+  const c = document.createElement('canvas');
+  c.width = 1024;
+  c.height = Math.round(1024 / aspect);
+  const h = c.height;
+  const ctx = c.getContext('2d')!;
+  // flash
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(h * 0.34, h * 0.14);
+  ctx.lineTo(h * 0.62, h * 0.14);
+  ctx.lineTo(h * 0.36, h * 0.86);
+  ctx.lineTo(h * 0.08, h * 0.86);
+  ctx.closePath();
+  ctx.fill();
+  // name, with a dark edge so it reads on any paint colour
+  ctx.font = `italic 800 ${Math.round(h * 0.86)}px "Saira Condensed", "Arial Narrow", sans-serif`;
+  ctx.textBaseline = 'middle';
+  ctx.lineJoin = 'round';
+  const x = h * 0.74;
+  const max = c.width - x - h * 0.1;
+  ctx.lineWidth = h * 0.09;
+  ctx.strokeStyle = 'rgba(11,11,15,0.85)';
+  ctx.strokeText(name.toUpperCase(), x, h * 0.54, max);
+  ctx.fillStyle = '#f4f4f0';
+  ctx.fillText(name.toUpperCase(), x, h * 0.54, max);
+  return finishTexture(c);
+}
+
+/** A single row of small names, spread evenly across the panel. */
+function stripTexture(names: string[], aspect: number) {
+  const c = document.createElement('canvas');
+  c.width = 1024;
+  c.height = Math.round(1024 / aspect);
+  const h = c.height;
+  const ctx = c.getContext('2d')!;
+  ctx.font = `italic 700 ${Math.round(h * 0.8)}px "Saira Condensed", "Arial Narrow", sans-serif`;
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center';
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = h * 0.12;
+  ctx.strokeStyle = 'rgba(11,11,15,0.85)';
+  ctx.fillStyle = '#f4f4f0';
+  const cell = c.width / Math.max(names.length, 1);
+  names.forEach((n, i) => {
+    const x = cell * (i + 0.5);
+    ctx.strokeText(n.toUpperCase(), x, h * 0.54, cell * 0.88);
+    ctx.fillText(n.toUpperCase(), x, h * 0.54, cell * 0.88);
+  });
+  return finishTexture(c);
+}
+
+function finishTexture(c: HTMLCanvasElement) {
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
+  return tex;
+}
+
+/* ------------------------------------------------------------------ */
+/* Livery                                                                */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Decal panels, as [width along the car, height, projection depth] in metres. Each one is
+ * projected onto the bodywork so it follows the curves. Depth is kept shallow so a decal
+ * only lands on the skin facing it, not on the far side of the part.
+ */
+const PANEL = {
+  sidepod: [0.78, 0.19, 0.25],
+  strip: [0.74, 0.05, 0.25],
+  engineCover: [0.58, 0.105, 0.12],
+  nose: [0.62, 0.13, 0.3],
+  cockpit: [0.42, 0.1, 0.16],
+} satisfies Record<string, V3>;
+
+const aspect = (p: V3) => p[0] / p[1];
+
+/** One decal on the parent mesh. Must be rendered as a child of that mesh. */
+function Sticker({ map, position, rotation, scale }: { map: THREE.Texture; position: V3; rotation: V3; scale: V3 }) {
+  return (
+    // map and depthTest are repeated on Decal because it also writes them onto whatever material it ends up with
+    <Decal position={position} rotation={rotation} scale={scale} map={map} depthTest>
+      <meshBasicMaterial map={map} transparent depthTest depthWrite={false} polygonOffset polygonOffsetFactor={-10} />
+    </Decal>
+  );
+}
+
+/** Side decals face outwards: +Z on the right of the car, turned round on the left so the text is not mirrored. */
+const facing = (s: number, tilt = 0): V3 => (s > 0 ? [0, 0, tilt] : [0, Math.PI, -tilt]);
+
 /* ------------------------------------------------------------------ */
 /* Small parts                                                           */
 /* ------------------------------------------------------------------ */
@@ -352,6 +448,18 @@ export function Car() {
     [],
   );
 
+  // Livery: the stack from profile.ts, placed where a team puts its sponsors
+  const livery = useMemo(() => {
+    const l = profile.livery;
+    return {
+      sidepod: wordmarkTexture(l.sidepod.name, l.sidepod.color, aspect(PANEL.sidepod)),
+      strip: stripTexture(l.strip, aspect(PANEL.strip)),
+      engineCover: wordmarkTexture(l.engineCover.name, l.engineCover.color, aspect(PANEL.engineCover)),
+      nose: wordmarkTexture(l.nose.name, l.nose.color, aspect(PANEL.nose)),
+      cockpit: wordmarkTexture(l.cockpit.name, l.cockpit.color, aspect(PANEL.cockpit)),
+    };
+  }, []);
+
   const geo = useMemo(
     () => ({
       spine: loft(SPINE, 72, 40),
@@ -405,10 +513,24 @@ export function Car() {
       </mesh>
 
       {/* ---------- bodywork ---------- */}
-      <mesh geometry={geo.spine} material={mat.paint} />
-      <mesh geometry={geo.airbox} material={mat.paint} />
-      <mesh geometry={geo.podL} material={mat.paint} />
-      <mesh geometry={geo.podR} material={mat.paint} />
+      <mesh geometry={geo.spine} material={mat.paint}>
+        {/* along the top of the nose, read from the right-hand side */}
+        <Sticker map={livery.nose} position={[1.72, 0.52, 0]} rotation={[-Math.PI / 2, 0, 0]} scale={PANEL.nose} />
+        {[1, -1].map((s) => (
+          <Sticker key={s} map={livery.cockpit} position={[1.0, 0.46, s * 0.24]} rotation={facing(s)} scale={PANEL.cockpit} />
+        ))}
+      </mesh>
+      <mesh geometry={geo.airbox} material={mat.paint}>
+        {[1, -1].map((s) => (
+          <Sticker key={s} map={livery.engineCover} position={[-0.76, 0.745, s * 0.085]} rotation={facing(s, 0.19)} scale={PANEL.engineCover} />
+        ))}
+      </mesh>
+      {([[geo.podL, 1], [geo.podR, -1]] as const).map(([pod, s]) => (
+        <mesh key={s} geometry={pod} material={mat.paint}>
+          <Sticker map={livery.sidepod} position={[-0.1, 0.44, s * 0.8]} rotation={facing(s)} scale={PANEL.sidepod} />
+          <Sticker map={livery.strip} position={[-0.1, 0.285, s * 0.8]} rotation={facing(s)} scale={PANEL.strip} />
+        </mesh>
+      ))}
       <mesh geometry={geo.fin} material={mat.carbon} />
       <mesh geometry={geo.floor} material={mat.carbon} position={[0, 0.09, 0]} />
       <mesh geometry={geo.diffuser} material={mat.carbon} />
