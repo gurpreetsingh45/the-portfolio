@@ -1,4 +1,4 @@
-import { profile } from '../../data/profile';
+import { profile, sectionNumber } from '../../data/profile';
 import { SectionHeading } from '../ui/SectionHeading';
 
 /** A winding circuit: one corner per milestone, alternating left (20) and right (80). */
@@ -24,7 +24,7 @@ export function Timeline() {
   return (
     <section id="experience" data-pose="experience" aria-labelledby="experience-title" className="relative z-10 py-24 md:py-36">
       <div className="wrap">
-        <SectionHeading index="04" eyebrow="Season history" title="Experience" id="experience-title" className="md:text-center md:[&_.kerb]:mx-auto" />
+        <SectionHeading index={sectionNumber('experience')} eyebrow="Season history" title="Experience" id="experience-title" className="md:text-center md:[&_.kerb]:mx-auto" />
 
         <div className="relative">
           {/* The track: narrow gutter on phones, centre lane on desktop */}

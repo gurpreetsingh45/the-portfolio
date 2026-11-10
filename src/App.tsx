@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useState } from 'react';
+import { Fragment, lazy, Suspense, useCallback, useState } from 'react';
 import { Nav } from './components/layout/Nav';
 import { Footer } from './components/layout/Footer';
 import { SectionDivider } from './components/layout/SectionDivider';
@@ -10,11 +10,22 @@ import { Timeline } from './components/sections/Timeline';
 import { Achievements } from './components/sections/Achievements';
 import { Contact } from './components/sections/Contact';
 import { StartLights } from './components/ui/StartLights';
+import { SHOW_AWARDS, SHOW_EXPERIENCE } from './data/profile';
 import { useReducedMotion } from './hooks/useMediaQuery';
 import { useSmoothScroll } from './hooks/useSmoothScroll';
 
 // The 3D scene is code-split so text and layout paint first.
 const Scene = lazy(() => import('./components/three/Scene'));
+
+/** Page order. Dividers between them alternate direction automatically. */
+const SECTIONS = [
+  About,
+  Skills,
+  Projects,
+  ...(SHOW_EXPERIENCE ? [Timeline] : []),
+  ...(SHOW_AWARDS ? [Achievements] : []),
+  Contact,
+];
 
 const INTRO_KEY = 'lights-out-seen';
 
@@ -72,18 +83,12 @@ export default function App() {
       <Nav />
       <main>
         <Hero use3d={use3d} />
-        <SectionDivider />
-        <About />
-        <SectionDivider flip />
-        <Skills />
-        <SectionDivider />
-        <Projects />
-        <SectionDivider flip />
-        <Timeline />
-        <SectionDivider />
-        <Achievements />
-        <SectionDivider flip />
-        <Contact />
+        {SECTIONS.map((Section, i) => (
+          <Fragment key={i}>
+            <SectionDivider flip={i % 2 === 1} />
+            <Section />
+          </Fragment>
+        ))}
       </main>
       <Footer />
     </>

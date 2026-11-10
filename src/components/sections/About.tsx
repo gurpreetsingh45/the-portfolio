@@ -1,4 +1,4 @@
-import { profile } from '../../data/profile';
+import { profile, sectionNumber } from '../../data/profile';
 import { SectionHeading } from '../ui/SectionHeading';
 
 export function About() {
@@ -6,7 +6,7 @@ export function About() {
     <section id="about" data-pose="about" aria-labelledby="about-title" className="relative z-10 py-24 md:py-36">
       <div className="wrap">
         <div className="md:w-[52%]">
-          <SectionHeading index="01" eyebrow="Driver profile" title="About" id="about-title" />
+          <SectionHeading index={sectionNumber('about')} eyebrow="Driver profile" title="About" id="about-title" />
 
           <div data-reveal className="flex items-center gap-5">
             {/* Portrait placeholder — swap for an <img> with the same rounded-full classes */}

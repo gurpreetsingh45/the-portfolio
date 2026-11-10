@@ -4,6 +4,16 @@
  * (Also update the <title> and meta description in /index.html.)
  */
 
+/**
+ * SWITCHES: show the Experience and Awards sections?
+ * Set either to `false` to hide that section. Everything else adapts by itself: the nav
+ * and mobile menu, the section numbers, the lap (the car drives straight on to the next
+ * section), the trackside boards and the minimap. A hidden section's code is also left
+ * out of the built site.
+ */
+export const SHOW_EXPERIENCE = false;
+export const SHOW_AWARDS = false;
+
 export type SkillLevel = "purple" | "green" | "yellow";
 
 export const profile = {
@@ -200,4 +210,9 @@ export const sections = [
   { id: "experience", label: "Experience" },
   { id: "awards", label: "Awards" },
   { id: "contact", label: "Contact" },
-];
+].filter((s) => (SHOW_EXPERIENCE || s.id !== "experience") && (SHOW_AWARDS || s.id !== "awards"));
+
+/** The two-digit number shown beside a section heading ("01", "02", ...), following the sections that are switched on. */
+export function sectionNumber(id: string) {
+  return String(sections.findIndex((s) => s.id === id) + 1).padStart(2, "0");
+}

@@ -1,4 +1,4 @@
-import { profile } from '../../data/profile';
+import { profile, sectionNumber } from '../../data/profile';
 import { SectionHeading } from '../ui/SectionHeading';
 
 const STROKES = ['var(--color-sector-yellow)', 'rgb(244 244 240 / 0.8)', 'var(--color-race)'];
@@ -8,7 +8,7 @@ export function Achievements() {
     <section id="awards" data-pose="awards" aria-labelledby="awards-title" className="relative z-10 py-24 md:py-36">
       <div className="wrap">
         <div className="md:ml-auto md:w-[52%]">
-          <SectionHeading index="05" eyebrow="Podium" title="Awards" id="awards-title" />
+          <SectionHeading index={sectionNumber('awards')} eyebrow="Podium" title="Awards" id="awards-title" />
 
           <ol>
             {profile.achievements.map((a, i) => (

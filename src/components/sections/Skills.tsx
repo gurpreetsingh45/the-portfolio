@@ -1,4 +1,4 @@
-import { profile, type SkillLevel } from '../../data/profile';
+import { profile, type SkillLevel, sectionNumber } from '../../data/profile';
 import { SectionHeading } from '../ui/SectionHeading';
 import { ArcGauge } from '../ui/ArcGauge';
 
@@ -15,7 +15,7 @@ export function Skills() {
   return (
     <section id="skills" data-pose="skills" aria-labelledby="skills-title" className="relative z-10 py-24 md:py-36">
       <div className="wrap">
-        <SectionHeading index="02" eyebrow="Telemetry" title="Skills" id="skills-title" />
+        <SectionHeading index={sectionNumber('skills')} eyebrow="Telemetry" title="Skills" id="skills-title" />
 
         <ul data-reveal className="mb-12 flex flex-wrap gap-x-6 gap-y-2" aria-label="Legend">
           {Object.values(LEVELS).map((l) => (

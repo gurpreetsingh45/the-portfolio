@@ -3,6 +3,7 @@ import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { setLenis } from '../lib/scroll';
+import { SHOW_EXPERIENCE } from '../data/profile';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -31,7 +32,7 @@ export function useSmoothScroll(enabled: boolean) {
       });
 
       // Season History: racing line traces itself as you scroll
-      gsap.utils.toArray<HTMLElement>('[data-trace]').forEach((el) => {
+      if (SHOW_EXPERIENCE) gsap.utils.toArray<HTMLElement>('[data-trace]').forEach((el) => {
         ScrollTrigger.create({
           trigger: el,
           start: 'top 65%',

@@ -1,4 +1,4 @@
-import { profile } from '../../data/profile';
+import { profile, sectionNumber } from '../../data/profile';
 import { DEFAULT_ACCENT, scene } from '../../lib/sceneStore';
 import { SectionHeading } from '../ui/SectionHeading';
 
@@ -11,7 +11,7 @@ export function Projects() {
   return (
     <section id="projects" data-pose="projects" aria-labelledby="projects-title" className="relative z-10 py-24 md:py-36">
       <div className="wrap">
-        <SectionHeading index="03" eyebrow="Race calendar" title="Projects" id="projects-title" />
+        <SectionHeading index={sectionNumber('projects')} eyebrow="Race calendar" title="Projects" id="projects-title" />
 
         <ol className="flex flex-col gap-24 md:gap-32">
           {profile.projects.map((p, i) => {
