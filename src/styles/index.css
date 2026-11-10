@@ -1,0 +1,122 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-carbon: #0b0b0f;
+  --color-asphalt: #16161d;
+  --color-chalk: #f4f4f0;
+  --color-mute: #a3a3af;
+  --color-race: #ff2a1f;
+  --color-sector-purple: #b45cff;
+  --color-sector-green: #19d27c;
+  --color-sector-yellow: #ffd23f;
+
+  --font-display: 'Saira Condensed', 'Arial Narrow', sans-serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    background: var(--color-carbon);
+    color: var(--color-chalk);
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
+  }
+  body {
+    font-family: var(--font-sans);
+    min-height: 100svh;
+    overflow-x: clip;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Soft ambient glows instead of panels */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(60vmax 60vmax at 85% 10%, rgb(255 42 31 / 0.13), transparent 60%),
+      radial-gradient(50vmax 50vmax at 5% 90%, rgb(180 92 255 / 0.08), transparent 60%);
+    pointer-events: none;
+  }
+  ::selection {
+    background: var(--color-race);
+    color: var(--color-carbon);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-sector-yellow);
+    outline-offset: 4px;
+    border-radius: 999px;
+  }
+}
+
+/* Page container with safe-area aware gutters */
+@utility wrap {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 72rem;
+  padding-left: max(1.25rem, env(safe-area-inset-left));
+  padding-right: max(1.25rem, env(safe-area-inset-right));
+  @media (min-width: 640px) {
+    padding-left: max(2rem, env(safe-area-inset-left));
+    padding-right: max(2rem, env(safe-area-inset-right));
+  }
+}
+
+@utility display {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+}
+
+@utility outline-text {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--stroke, rgb(244 244 240 / 0.6));
+}
+
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-mute);
+}
+
+/* Red/white kerb stripe */
+@utility kerb {
+  height: 6px;
+  border-radius: 999px;
+  background: repeating-linear-gradient(
+    -55deg,
+    var(--color-race) 0 14px,
+    var(--color-chalk) 14px 28px
+  );
+}
+
+/* Chequered flag that waves away into the background */
+@utility chequer {
+  background:
+    conic-gradient(
+        rgb(244 244 240 / 0.9) 25%,
+        transparent 0 50%,
+        rgb(244 244 240 / 0.9) 0 75%,
+        transparent 0
+      )
+      0 0 / 36px 36px;
+  transform: skewX(-18deg) scaleX(1.2);
+  mask-image: radial-gradient(120% 100% at 50% 100%, #000 0%, transparent 70%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
